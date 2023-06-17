@@ -41,6 +41,8 @@ dependencies:
   geolocator: ^9.0.2
   telephony: ^0.2.0
   socket_io_client: ^2.0.1
+  carrier_info: ^2.0.8
+  firebase_core: ^2.14.0
 
 dev_dependencies:
   flutter_test:

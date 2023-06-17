@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import 'package:carrier_info/carrier_info.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
 import 'package:gsm_info/gsm_info.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/cupertino.dart';
 import 'dart:io';
 
 void main() {
@@ -32,6 +35,18 @@ class _MyAppState extends State<MyApp> {
   late StreamSubscription<Position> positionStream;
   String lat = '', long = '';
 
+  IosCarrierData? _iosInfo;
+  IosCarrierData? get iosInfo => _iosInfo;
+  set iosInfo(IosCarrierData? iosInfo) {
+    setState(() => _iosInfo = iosInfo);
+  }
+
+  AndroidCarrierData? _androidInfo;
+  AndroidCarrierData? get androidInfo => _androidInfo;
+  set androidInfo(AndroidCarrierData? carrierInfo) {
+    setState(() => _androidInfo = carrierInfo);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +56,7 @@ class _MyAppState extends State<MyApp> {
     getsignal_strength();
 
     initSocket();
+    initPlatformState();
 
     timer = Timer.periodic(
         const Duration(seconds: 5), (Timer t) => sendDatatoServer());
@@ -80,9 +96,30 @@ class _MyAppState extends State<MyApp> {
     getsignal_strength();
   }
 
+  Future<void> initPlatformState() async {
+    // Ask for permissions before requesting data
+    await [
+      Permission.locationWhenInUse,
+      Permission.phone,
+      Permission.sms,
+    ].request();
+
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      if (Platform.isAndroid) androidInfo = await CarrierInfo.getAndroidInfo();
+      if (Platform.isIOS) iosInfo = await CarrierInfo.getIosInfo();
+    } catch (e) {
+      print(e.toString());
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+  }
+
   Future<void> initSocket() async {
     try {
-      socket = IO.io("http://192.168.8.101:3700", <String, dynamic>{
+      socket = IO.io("http://192.168.8.100:3700", <String, dynamic>{
         'transports': ['websocket'],
         'autoConnect': true,
       });
@@ -215,6 +252,22 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
               ),
+              ...(androidInfo?.telephonyInfo ?? []).map((it) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Service Provider: ${it.displayName}',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: CupertinoColors.systemGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
               ElevatedButton.icon(
                   onPressed: getLocation,
                   icon: const Icon(Icons.add_location_rounded),
