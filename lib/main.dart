@@ -33,7 +33,7 @@ class _MyAppState extends State<MyApp> {
   int _signal_strength = 0;
   late Position position;
   late StreamSubscription<Position> positionStream;
-  String lat = '', long = '';
+  double lat = 0.0, long = 0.0;
 
   IosCarrierData? _iosInfo;
   IosCarrierData? get iosInfo => _iosInfo;
@@ -63,7 +63,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   sendDatatoServer() {
-    var dataComb = {"lat": lat, "Long": long, "signal": _signal_strength};
+    var dataComb = {"lat": lat, "long": long, "signal": _signal_strength};
 
     socket.emit('data-retrieve', jsonEncode(dataComb));
   }
@@ -80,13 +80,13 @@ class _MyAppState extends State<MyApp> {
             .listen((Position position) {
       if (position != null) {
         setState(() {
-          lat = position.latitude.toStringAsFixed(9);
-          long = position.longitude.toStringAsFixed(9);
+          lat = position.latitude;
+          long = position.longitude;
         });
       } else {
         setState(() {
-          lat = 'Unknown';
-          long = 'Unknown';
+          lat = 0.0;
+          long = 0.0;
         });
       }
     });
@@ -119,7 +119,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initSocket() async {
     try {
-      socket = IO.io("http://192.168.8.100:3700", <String, dynamic>{
+      socket = IO.io("http://172.20.10.8:3700", <String, dynamic>{
         'transports': ['websocket'],
         'autoConnect': true,
       });
