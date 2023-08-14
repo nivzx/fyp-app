@@ -11,6 +11,7 @@ import 'package:gsm_info/gsm_info.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -58,10 +59,11 @@ class _MyAppState extends State<MyApp> {
     initSocket();
     initPlatformState();
 
-    timer = Timer.periodic(
-        const Duration(seconds: 5), (Timer t) => sendDatatoServer());
+    timer = Timer.periodic(const Duration(seconds: 5),
+        (Timer t) => sendDatatoAPI(lat, long, _signal_strength));
   }
 
+//sendDatatoAPI(lat, long, _signal_strength)
   sendDatatoServer() {
     var dataComb = {"lat": lat, "long": long, "signal": _signal_strength};
 
@@ -119,7 +121,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initSocket() async {
     try {
-      socket = IO.io("http://172.20.10.8:3700", <String, dynamic>{
+      socket = IO.io("http://172.20.10.3:3700", <String, dynamic>{
         'transports': ['websocket'],
         'autoConnect': true,
       });
@@ -128,6 +130,24 @@ class _MyAppState extends State<MyApp> {
       socket.onConnect((data) => {});
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  Future<void> sendDatatoAPI(lat, long, level) async {
+    final Map<String, dynamic> dataTel = {
+      "lat": lat,
+      "long": long,
+      "level": level
+    };
+    final response = await http.post(
+        Uri.parse('http://localhost:33000/incoming-data'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(dataTel));
+
+    if (response.statusCode == 200) {
+      print('Response: ${response.body}');
+    } else {
+      print('Error occured: ${response.statusCode}');
     }
   }
 

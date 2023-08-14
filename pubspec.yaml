@@ -43,6 +43,7 @@ dependencies:
   socket_io_client: ^2.0.1
   carrier_info: ^2.0.8
   firebase_core: ^2.14.0
+  http: ^0.13.6
 
 dev_dependencies:
   flutter_test:
