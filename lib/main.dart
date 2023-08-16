@@ -5,6 +5,7 @@ import './services/location_service.dart';
 
 import './widgets/signal_box.dart';
 import './widgets/location_box.dart';
+import './widgets/map.dart';
 
 import 'dart:async';
 
@@ -56,7 +57,7 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
 
     Timer.periodic(
-      const Duration(seconds: 1),
+      const Duration(seconds: 20),
       (Timer t) => {
         getLocation(),
         getSignalStrength(),
@@ -134,6 +135,12 @@ class _MyAppState extends State<MyApp> {
                   SignalBox(signalLevel: signalLevel),
                   LocationBox(lat: lat, long: long),
                 ],
+              ),
+              const SizedBox(height: 20),
+              StaticMap(
+                latitude: lat,
+                longitude: long,
+                signalValue: signalLevel,
               ),
               ...(androidInfo?.telephonyInfo ?? []).map((it) {
                 return Padding(

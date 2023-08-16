@@ -20,9 +20,10 @@ class LocationBox extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.location_on, color: Colors.white), // White icon color
-              SizedBox(height: 10),
-              Text(
+              const Icon(Icons.location_on,
+                  color: Colors.white), // White icon color
+              const SizedBox(height: 10),
+              const Text(
                 'Location',
                 style: TextStyle(
                   fontSize: 16,
@@ -30,7 +31,7 @@ class LocationBox extends StatelessWidget {
                   color: Colors.white, // White text color
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
