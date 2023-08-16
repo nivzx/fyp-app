@@ -1,17 +1,18 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:g/services/api_service.dart';
+import 'package:g/services/signal_service.dart';
+import './services/location_service.dart';
+
+import './widgets/signal_box.dart';
+import './widgets/location_box.dart';
+
 import 'dart:async';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import 'package:carrier_info/carrier_info.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/services.dart';
-import 'package:gsm_info/gsm_info.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io';
-import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -25,13 +26,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late IO.Socket socket;
   double? latitude;
   double? longitude;
   double? signalStrength;
   Timer? timer;
-  static final GlobalKey<FormState> globalKey = GlobalKey<FormState>();
-  int _signal_strength = 0;
+  double signalLevel = 0;
   late Position position;
   late StreamSubscription<Position> positionStream;
   double lat = 0.0, long = 0.0;
@@ -53,49 +52,34 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     getLocation();
 
-    sleep(const Duration(seconds: 20));
-    getsignal_strength();
-
-    initSocket();
+    getSignalStrength();
     initPlatformState();
 
-    timer = Timer.periodic(const Duration(seconds: 5),
-        (Timer t) => sendDatatoAPI(lat, long, _signal_strength));
-  }
-
-//sendDatatoAPI(lat, long, _signal_strength)
-  sendDatatoServer() {
-    var dataComb = {"lat": lat, "long": long, "signal": _signal_strength};
-
-    socket.emit('data-retrieve', jsonEncode(dataComb));
+    Timer.periodic(
+      const Duration(seconds: 1),
+      (Timer t) => {
+        getLocation(),
+        getSignalStrength(),
+        // ApiService.sendDatatoAPI(lat, long, signalLevel)
+      },
+    );
   }
 
   getLocation() async {
-    LocationPermission permission = await Geolocator.requestPermission();
+    Position currentPosition = await LocationService.getRandomPosition();
 
-    var geolocator = Geolocator();
-    var locationOptions = const LocationSettings(
-        accuracy: LocationAccuracy.high, distanceFilter: 1);
-
-    positionStream =
-        Geolocator.getPositionStream(locationSettings: locationOptions)
-            .listen((Position position) {
-      if (position != null) {
-        setState(() {
-          lat = position.latitude;
-          long = position.longitude;
-        });
-      } else {
-        setState(() {
-          lat = 0.0;
-          long = 0.0;
-        });
-      }
+    setState(() {
+      lat = currentPosition.latitude;
+      long = currentPosition.longitude;
     });
   }
 
-  getSignal() {
-    getsignal_strength();
+  getSignalStrength() async {
+    double signalStrength = await SignalService.getRandomStrength();
+
+    setState(() {
+      signalLevel = signalStrength;
+    });
   }
 
   Future<void> initPlatformState() async {
@@ -119,64 +103,11 @@ class _MyAppState extends State<MyApp> {
     // setState to update our non-existent appearance.
   }
 
-  Future<void> initSocket() async {
-    try {
-      socket = IO.io("http://172.20.10.3:3700", <String, dynamic>{
-        'transports': ['websocket'],
-        'autoConnect': true,
-      });
-
-      socket.connect();
-      socket.onConnect((data) => {});
-    } catch (e) {
-      print(e.toString());
-    }
-  }
-
-  Future<void> sendDatatoAPI(lat, long, level) async {
-    final Map<String, dynamic> dataTel = {
-      "lat": lat,
-      "long": long,
-      "level": level
-    };
-    final response = await http.post(
-        Uri.parse('http://localhost:33000/incoming-data'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(dataTel));
-
-    if (response.statusCode == 200) {
-      print('Response: ${response.body}');
-    } else {
-      print('Error occured: ${response.statusCode}');
-    }
-  }
-
-  @override
-  void dispose() {
-    socket.disconnect();
-    super.dispose();
-  }
-
-  Future<void> getsignal_strength() async {
-    int signal_strength = 0;
-    try {
-      signal_strength = await GsmInfo.gsmSignalDbM;
-      print(signal_strength);
-    } on PlatformException {
-      signal_strength = -999;
-    }
-    if (!mounted) return;
-
-    setState(() {
-      _signal_strength = signal_strength;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme:
-          ThemeData(scaffoldBackgroundColor: Color.fromRGBO(211, 237, 254, 1)),
+      theme: ThemeData(
+          scaffoldBackgroundColor: const Color.fromRGBO(211, 237, 254, 1)),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
@@ -191,7 +122,7 @@ class _MyAppState extends State<MyApp> {
                 bottomLeft: Radius.circular(55)),
           ),
           elevation: 0.00,
-          backgroundColor: Color.fromARGB(240, 3, 45, 69),
+          backgroundColor: const Color.fromARGB(240, 3, 45, 69),
         ),
         body: Align(
           alignment: Alignment.topCenter,
@@ -200,78 +131,11 @@ class _MyAppState extends State<MyApp> {
               const SizedBox(
                 height: 20,
               ),
-              ElevatedButton(
-                onPressed: getSignal(),
-                style: ButtonStyle(
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18.0),
-                            side: const BorderSide(
-                                color: Color.fromARGB(255, 255, 255, 255))))),
-                child: const Text("Signal Level"),
-              ),
+              SignalBox(signalLevel: signalLevel),
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
-              SizedBox(
-                width: 380,
-                height: 150,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30.0),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(240, 3, 45, 69),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Color.fromARGB(255, 5, 5, 5),
-                            offset: Offset(3.0, 6.0),
-                            blurRadius: 10.0),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Running on \n \n $_signal_strength dBm',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontSize: 20),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              SizedBox(
-                width: 380,
-                height: 200,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30.0),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(240, 3, 45, 69),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black12,
-                            offset: Offset(3.0, 6.0),
-                            blurRadius: 10.0),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Latitude \n $lat \n \n Longitude \n $long',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontSize: 20),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              LocationBox(lat: lat, long: long),
               ...(androidInfo?.telephonyInfo ?? []).map((it) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 15),
@@ -288,14 +152,6 @@ class _MyAppState extends State<MyApp> {
                   ),
                 );
               }),
-              ElevatedButton.icon(
-                  onPressed: getLocation,
-                  icon: const Icon(Icons.add_location_rounded),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(171, 207, 17, 17),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(100))),
-                  label: const Text("Location")),
             ],
           ),
         ),
