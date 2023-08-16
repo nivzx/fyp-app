@@ -128,14 +128,13 @@ class _MyAppState extends State<MyApp> {
           alignment: Alignment.topCenter,
           child: Column(
             children: <Widget>[
-              const SizedBox(
-                height: 20,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  SignalBox(signalLevel: signalLevel),
+                  LocationBox(lat: lat, long: long),
+                ],
               ),
-              SignalBox(signalLevel: signalLevel),
-              const SizedBox(
-                height: 20,
-              ),
-              LocationBox(lat: lat, long: long),
               ...(androidInfo?.telephonyInfo ?? []).map((it) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 15),

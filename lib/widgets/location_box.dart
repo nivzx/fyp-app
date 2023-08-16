@@ -9,31 +9,58 @@ class LocationBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 380,
-      height: 180,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30.0),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color.fromARGB(240, 3, 45, 69),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                offset: Offset(3.0, 6.0),
-                blurRadius: 10.0,
+      width: 190, // Reduced width for single row layout
+      height: 150,
+      child: Card(
+        elevation: 5.0,
+        color:
+            const Color.fromARGB(240, 3, 45, 69), // Set background color to red
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.location_on, color: Colors.white), // White icon color
+              SizedBox(height: 10),
+              Text(
+                'Location',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // White text color
+                ),
+              ),
+              SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      'Latitude: ${lat.toStringAsFixed(4)}',
+                      style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white), // White text color
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      'Longitude: ${long.toStringAsFixed(4)}',
+                      style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white), // White text color
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
-          child: Center(
-            child: Text(
-              'Latitude \n $lat \n \n Longitude \n $long',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 20,
-              ),
-              textAlign: TextAlign.center,
-            ),
           ),
         ),
       ),

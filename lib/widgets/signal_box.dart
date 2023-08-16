@@ -8,31 +8,35 @@ class SignalBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 380,
-      height: 120,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Color.fromARGB(240, 3, 45, 69),
-            boxShadow: [
-              BoxShadow(
-                color: Color.fromARGB(255, 5, 5, 5),
-                offset: Offset(3.0, 6.0),
-                blurRadius: 10.0,
+      width: 190, // Reduced width for single row layout
+      height: 150,
+      child: Card(
+        elevation: 5.0,
+        color:
+            const Color.fromARGB(240, 3, 45, 69), // Set background color to red
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.signal_cellular_alt,
+                  color: Colors.white), // White icon color
+              SizedBox(height: 10),
+              Text(
+                'Signal Level',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // White text color
+                ),
+              ),
+              SizedBox(height: 5),
+              Text(
+                '${signalLevel.toStringAsFixed(2)} dBm',
+                style: TextStyle(
+                    fontSize: 14, color: Colors.white), // White text color
               ),
             ],
-          ),
-          child: Center(
-            child: Text(
-              'Running on \n \n $signalLevel dBm',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 20,
-              ),
-              textAlign: TextAlign.center,
-            ),
           ),
         ),
       ),
