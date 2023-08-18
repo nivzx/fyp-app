@@ -137,10 +137,9 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               const SizedBox(height: 20),
-              StaticMap(
-                latitude: lat,
-                longitude: long,
-                signalValue: signalLevel,
+              const Expanded(
+                child:
+                    GoogleMapWidget(initialLat: 6.0350, initialLong: 80.2150),
               ),
               ...(androidInfo?.telephonyInfo ?? []).map((it) {
                 return Padding(
