@@ -22,4 +22,18 @@ class ApiService {
       print('Error occurred: ${response.statusCode}');
     }
   }
+
+  static Future<List<dynamic>> getHighLocations() async {
+    final response = await http.get(
+      Uri.parse(
+          'http://192.168.8.121:4000/channels/mychannel/chaincodes/fabcar?args=["-75"]&peer=peer0.org1.example.com&fcn=getHighLocations'),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data;
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
 }
