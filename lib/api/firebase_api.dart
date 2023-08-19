@@ -20,7 +20,6 @@ class FirebaseApi {
 
   Future<void> initNotifications() async {
     await _firebaseMessaging.requestPermission();
-
     _firebaseMessaging.subscribeToTopic('all');
 
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
