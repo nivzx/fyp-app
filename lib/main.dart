@@ -116,6 +116,7 @@ class _MyAppState extends State<MyApp> {
       if (Platform.isAndroid) androidInfo = await CarrierInfo.getAndroidInfo();
       if (Platform.isIOS) iosInfo = await CarrierInfo.getIosInfo();
     } catch (e) {
+      // ignore: avoid_print
       print(e.toString());
     }
 

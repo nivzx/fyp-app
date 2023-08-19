@@ -17,11 +17,11 @@ class GoogleMapWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _GoogleMapWidgetState createState() => _GoogleMapWidgetState();
 }
 
 class _GoogleMapWidgetState extends State<GoogleMapWidget> {
-  GoogleMapController? _controller;
   Set<Marker> _mapMarkers = {};
 
   @override
@@ -32,13 +32,6 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
     Timer.periodic(const Duration(minutes: 5), (timer) {
       _fetchDataAndSetMarkers();
     });
-  }
-
-  Future<BitmapDescriptor> _getCustomMarkerIcon() async {
-    final ByteData markerIconData =
-        await rootBundle.load('assets/level_marker.png');
-    final Uint8List markerIconBytes = markerIconData.buffer.asUint8List();
-    return BitmapDescriptor.fromBytes(markerIconBytes);
   }
 
   Future<void> _fetchDataAndSetMarkers() async {
@@ -77,9 +70,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
     );
 
     return GoogleMap(
-      onMapCreated: (controller) {
-        _controller = controller;
-      },
+      onMapCreated: (controller) {},
       initialCameraPosition: initialCameraPosition,
       markers: _mapMarkers,
     );

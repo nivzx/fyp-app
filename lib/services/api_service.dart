@@ -18,8 +18,10 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
+      // ignore: avoid_print
       print('Response: ${response.body}');
     } else {
+      // ignore: avoid_print
       print('Error occurred: ${response.statusCode}');
     }
   }
