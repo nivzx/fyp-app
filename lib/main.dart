@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:g/services/api_service.dart';
 import 'package:g/services/signal_service.dart';
@@ -15,7 +16,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io';
 
-void main() {
+import 'api/firebase_api.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await FirebaseApi().initNotifications();
   runApp(const MyApp());
 }
 
@@ -65,7 +71,7 @@ class _MyAppState extends State<MyApp> {
   void updateData() async {
     await getLocation();
     await getSignalStrength();
-    await ApiService.sendDatatoAPI(lat, long, signalLevel);
+    // await ApiService.sendDatatoAPI(lat, long, signalLevel);
   }
 
   getLocation() async {
