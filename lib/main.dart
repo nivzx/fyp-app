@@ -56,14 +56,16 @@ class _MyAppState extends State<MyApp> {
     getSignalStrength();
     initPlatformState();
 
-    Timer.periodic(
+    timer = Timer.periodic(
       const Duration(seconds: 20),
-      (Timer t) => {
-        getLocation(),
-        getSignalStrength(),
-        ApiService.sendDatatoAPI(lat, long, signalLevel)
-      },
+      (Timer t) => updateData(),
     );
+  }
+
+  void updateData() async {
+    await getLocation();
+    await getSignalStrength();
+    await ApiService.sendDatatoAPI(lat, long, signalLevel);
   }
 
   getLocation() async {
@@ -81,6 +83,24 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       signalLevel = signalStrength;
     });
+  }
+
+  Widget buildMapWidget() {
+    return lat == 0 && long == 0
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : GoogleMapWidget(initialLat: lat, initialLong: long);
+  }
+
+  Widget buildServiceProviderText() {
+    return Text(
+      'Service Provider: ${androidInfo!.telephonyInfo[0].displayName}',
+      style: const TextStyle(
+        fontSize: 15,
+        color: CupertinoColors.systemGrey,
+      ),
+    );
   }
 
   Future<void> initPlatformState() async {
@@ -137,23 +157,11 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               const SizedBox(height: 20),
-              Expanded(
-                child: lat == 0 && long == 0
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : GoogleMapWidget(initialLat: lat, initialLong: long),
-              ),
+              Expanded(child: buildMapWidget()),
               if (androidInfo != null && androidInfo!.telephonyInfo.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Text(
-                    'Service Provider: ${androidInfo!.telephonyInfo[0].displayName}',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: CupertinoColors.systemGrey,
-                    ),
-                  ),
+                  child: buildServiceProviderText(),
                 ),
             ],
           ),

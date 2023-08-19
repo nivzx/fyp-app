@@ -4,7 +4,7 @@ class LocationBox extends StatelessWidget {
   final double lat;
   final double long;
 
-  const LocationBox({required this.lat, required this.long});
+  const LocationBox({super.key, required this.lat, required this.long});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class LocationBox extends StatelessWidget {
                   Flexible(
                     child: Text(
                       'Latitude: ${lat.toStringAsFixed(4)}',
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 14,
                           color: Colors.white), // White text color
                       textAlign: TextAlign.center,
@@ -46,14 +46,14 @@ class LocationBox extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Flexible(
                     child: Text(
                       'Longitude: ${long.toStringAsFixed(4)}',
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 14,
                           color: Colors.white), // White text color
                       textAlign: TextAlign.center,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class SignalBox extends StatelessWidget {
   final int signalLevel;
 
-  const SignalBox({required this.signalLevel});
+  const SignalBox({super.key, required this.signalLevel});
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +19,10 @@ class SignalBox extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.signal_cellular_alt,
+              const Icon(Icons.signal_cellular_alt,
                   color: Colors.white), // White icon color
-              SizedBox(height: 10),
-              Text(
+              const SizedBox(height: 10),
+              const Text(
                 'Signal Level',
                 style: TextStyle(
                   fontSize: 16,
@@ -30,10 +30,10 @@ class SignalBox extends StatelessWidget {
                   color: Colors.white, // White text color
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Text(
-                '${signalLevel} dBm',
-                style: TextStyle(
+                '$signalLevel dBm',
+                style: const TextStyle(
                     fontSize: 14, color: Colors.white), // White text color
               ),
             ],

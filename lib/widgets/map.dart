@@ -29,7 +29,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
     super.initState();
     // Call the method to fetch data and update markers every 5 minutes
     _fetchDataAndSetMarkers();
-    Timer.periodic(Duration(minutes: 5), (timer) {
+    Timer.periodic(const Duration(minutes: 5), (timer) {
       _fetchDataAndSetMarkers();
     });
   }
