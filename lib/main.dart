@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
   double? longitude;
   double? signalStrength;
   Timer? timer;
-  double signalLevel = 0;
+  int signalLevel = 0;
   late Position position;
   late StreamSubscription<Position> positionStream;
   double lat = 0.0, long = 0.0;
@@ -61,13 +61,13 @@ class _MyAppState extends State<MyApp> {
       (Timer t) => {
         getLocation(),
         getSignalStrength(),
-        // ApiService.sendDatatoAPI(lat, long, signalLevel)
+        ApiService.sendDatatoAPI(lat, long, signalLevel)
       },
     );
   }
 
   getLocation() async {
-    Position currentPosition = await LocationService.getRandomPosition();
+    Position currentPosition = await LocationService.getCurrentPosition();
 
     setState(() {
       lat = currentPosition.latitude;
@@ -76,7 +76,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   getSignalStrength() async {
-    double signalStrength = await SignalService.getRandomStrength();
+    int signalStrength = await SignalService.getSignalStrength();
 
     setState(() {
       signalLevel = signalStrength;
@@ -137,26 +137,24 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               const SizedBox(height: 20),
-              const Expanded(
-                child:
-                    GoogleMapWidget(initialLat: 6.0350, initialLong: 80.2150),
+              Expanded(
+                child: lat == 0 && long == 0
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : GoogleMapWidget(initialLat: lat, initialLong: long),
               ),
-              ...(androidInfo?.telephonyInfo ?? []).map((it) {
-                return Padding(
+              if (androidInfo != null && androidInfo!.telephonyInfo.isNotEmpty)
+                Padding(
                   padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Service Provider: ${it.displayName}',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: CupertinoColors.systemGrey,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    'Service Provider: ${androidInfo!.telephonyInfo[0].displayName}',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: CupertinoColors.systemGrey,
+                    ),
                   ),
-                );
-              }),
+                ),
             ],
           ),
         ),

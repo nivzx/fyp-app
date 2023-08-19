@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SignalBox extends StatelessWidget {
-  final double signalLevel;
+  final int signalLevel;
 
   const SignalBox({required this.signalLevel});
 
@@ -32,7 +32,7 @@ class SignalBox extends StatelessWidget {
               ),
               SizedBox(height: 5),
               Text(
-                '${signalLevel.toStringAsFixed(2)} dBm',
+                '${signalLevel} dBm',
                 style: TextStyle(
                     fontSize: 14, color: Colors.white), // White text color
               ),
