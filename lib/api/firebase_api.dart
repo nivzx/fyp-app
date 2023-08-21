@@ -22,6 +22,18 @@ class FirebaseApi {
     await _firebaseMessaging.requestPermission();
     _firebaseMessaging.subscribeToTopic('all');
 
+    print('\x1B[31m Token: ${await getToken()}\x1B[0m');
+
+    FirebaseMessaging.onMessage.listen((message) {
+      print('\x1B[31mTitle: ${message.notification!.title}');
+      print('Body: ${message.notification!.body}');
+      print('Payload: ${message.data} \x1B[0m');
+    });
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+  }
+
+  //create a method to return the token
+  Future<String?> getToken() async {
+    return await _firebaseMessaging.getToken();
   }
 }

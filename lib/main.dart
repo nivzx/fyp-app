@@ -1,5 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:g/services/api_service.dart';
 import 'package:g/services/signal_service.dart';
 import './services/location_service.dart';
@@ -17,6 +19,16 @@ import 'package:flutter/cupertino.dart';
 import 'dart:io';
 
 import 'api/firebase_api.dart';
+
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'High Importance Notifications', // title
+  // 'This channel is used for important notifications.', // description
+  importance: Importance.high,
+);
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +48,8 @@ class _MyAppState extends State<MyApp> {
   double? latitude;
   double? longitude;
   double? signalStrength;
-  Timer? timer;
+  late Timer dataUpdateTimer;
+  late Timer firebaseUpdateTimer;
   int signalLevel = 0;
   late Position position;
   late StreamSubscription<Position> positionStream;
@@ -62,9 +75,14 @@ class _MyAppState extends State<MyApp> {
     getSignalStrength();
     initPlatformState();
 
-    timer = Timer.periodic(
+    dataUpdateTimer = Timer.periodic(
       const Duration(seconds: 20),
       (Timer t) => updateData(),
+    );
+
+    firebaseUpdateTimer = Timer.periodic(
+      const Duration(minutes: 15),
+      (Timer t) => updateFirebaseData(),
     );
   }
 
@@ -72,6 +90,13 @@ class _MyAppState extends State<MyApp> {
     await getLocation();
     await getSignalStrength();
     // await ApiService.sendDatatoAPI(lat, long, signalLevel);
+  }
+
+  void updateFirebaseData() async {
+    if (lat != 0 && long != 0) {
+      String? token = await FirebaseApi().getToken();
+      await ApiService.sendTokenLocation(token, lat, long);
+    }
   }
 
   getLocation() async {
@@ -109,6 +134,10 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  void sendDatatoAPIWithFixedValue() {
+    ApiService.sendDatatoAPI(lat, long, -20);
+  }
+
   Future<void> initPlatformState() async {
     // Ask for permissions before requesting data
     await [
@@ -138,42 +167,61 @@ class _MyAppState extends State<MyApp> {
           scaffoldBackgroundColor: const Color.fromRGBO(211, 237, 254, 1)),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('SignalSpotter'),
-          titleSpacing: 00.0,
-          centerTitle: true,
-          toolbarHeight: 100.2,
-          toolbarOpacity: 0.8,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(55),
-                bottomLeft: Radius.circular(55)),
+          appBar: AppBar(
+            title: const Text('SignalSpotter'),
+            titleSpacing: 00.0,
+            centerTitle: true,
+            toolbarHeight: 100.2,
+            toolbarOpacity: 0.8,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(55),
+                  bottomLeft: Radius.circular(55)),
+            ),
+            elevation: 0.00,
+            backgroundColor: const Color.fromARGB(240, 3, 45, 69),
           ),
-          elevation: 0.00,
-          backgroundColor: const Color.fromARGB(240, 3, 45, 69),
-        ),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: Column(
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  SignalBox(signalLevel: signalLevel),
-                  LocationBox(lat: lat, long: long),
+          body: Stack(children: [
+            Align(
+              alignment: Alignment.topCenter,
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SignalBox(signalLevel: signalLevel),
+                      LocationBox(lat: lat, long: long),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(child: buildMapWidget()),
+                  if (androidInfo != null &&
+                      androidInfo!.telephonyInfo.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: buildServiceProviderText(),
+                    ),
                 ],
               ),
-              const SizedBox(height: 20),
-              Expanded(child: buildMapWidget()),
-              if (androidInfo != null && androidInfo!.telephonyInfo.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: buildServiceProviderText(),
+            ),
+            Positioned(
+              bottom: 60, // Adjust the value for vertical positioning
+              left: 16, // Adjust the value for horizontal positioning
+              child: ElevatedButton(
+                onPressed: sendDatatoAPIWithFixedValue,
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(16),
+                  primary: Colors.red,
                 ),
-            ],
-          ),
-        ),
-      ),
+                child: const Icon(
+                  Icons.warning,
+                  size: 24,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ])),
     );
   }
 }

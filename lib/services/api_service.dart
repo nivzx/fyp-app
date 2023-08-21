@@ -39,4 +39,43 @@ class ApiService {
       throw Exception('Failed to load data');
     }
   }
+
+  static Future<void> sendTokenLocation(
+      String? token, double lat, double long) async {
+    // Concatenate and round latitude and longitude
+    String latLongConcatenated =
+        '${lat.toStringAsFixed(3)}_${long.toStringAsFixed(3)}';
+
+    // Create the request body
+    Map<String, dynamic> requestBody = {
+      "fcn": "writeToken",
+      "peers": ["peer0.org1.example.com", "peer0.org2.example.com"],
+      "chaincodeName": "token",
+      "channelName": "mychannel",
+      "args": [token, latLongConcatenated]
+    };
+
+    // Convert the request body to JSON
+    String requestBodyJson = jsonEncode(requestBody);
+
+    // Set up the POST request
+    Uri url =
+        Uri.parse('http://localhost:4000/channels/mychannel/chaincodes/token');
+    http.Response response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: requestBodyJson,
+    );
+
+    // Check the response
+    if (response.statusCode == 200) {
+      print('Token location sent successfully');
+    } else {
+      print(
+          'Error sending token location. Status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  }
 }
