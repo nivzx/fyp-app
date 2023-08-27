@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
   static Future<void> sendDatatoAPI(
@@ -11,7 +12,7 @@ class ApiService {
     };
 
     final response = await http.post(
-      Uri.parse('http://172.20.10.7:33000/incoming-data'),
+      Uri.parse('${dotenv.env['API_BASE_URL']}:33000/incoming-data'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(dataTel),
     );
@@ -28,7 +29,7 @@ class ApiService {
   static Future<List<dynamic>> getHighLocations() async {
     final response = await http.get(
       Uri.parse(
-          'http://172.20.10.7:4000/channels/mychannel/chaincodes/fabcar?args=["-75"]&peer=peer0.org1.example.com&fcn=getHighLocations'),
+          '${dotenv.env['API_BASE_URL']}:4000/channels/mychannel/chaincodes/level?args=["-30"]&peer=peer0.org1.example.com&fcn=getHighLocations'),
     );
 
     if (response.statusCode == 200) {
@@ -57,11 +58,9 @@ class ApiService {
     // Convert the request body to JSON
     String requestBodyJson = jsonEncode(requestBody);
 
-    print("\x1B[31m $requestBodyJson \x1B[0m");
-
     // Set up the POST request
     Uri url = Uri.parse(
-        'http://172.20.10.7:4000/channels/mychannel/chaincodes/token');
+        '${dotenv.env['API_BASE_URL']}:4000/channels/mychannel/chaincodes/token');
     http.Response response = await http.post(
       url,
       headers: {

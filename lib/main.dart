@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:g/services/api_service.dart';
 import 'package:g/services/signal_service.dart';
@@ -27,6 +28,8 @@ void main() async {
 
   final RemoteMessage? remoteMessage =
       await FirebaseMessaging.instance.getInitialMessage();
+
+  await dotenv.load(fileName: ".env");
 
   runApp(const MyApp());
 }
@@ -138,6 +141,12 @@ class _MyAppState extends State<MyApp> {
     ApiService.sendDatatoAPI(lat, long, -20);
   }
 
+  void sendDatatoAPIWithFakeLocation() async {
+    String? token = await FirebaseApi().getToken();
+    await ApiService.sendTokenLocation(token, lat + 0.01, long + 0.01);
+    ApiService.sendDatatoAPI(lat + 0.01, long + 0.01, -20);
+  }
+
   Future<void> initPlatformState() async {
     // Ask for permissions before requesting data
     await [
@@ -212,7 +221,24 @@ class _MyAppState extends State<MyApp> {
                 style: ElevatedButton.styleFrom(
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(16),
-                  primary: Colors.red,
+                  backgroundColor: Colors.red,
+                ),
+                child: const Icon(
+                  Icons.warning,
+                  size: 24,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 60, // Adjust the value for vertical positioning
+              left: 80, // Adjust the value for horizontal positioning
+              child: ElevatedButton(
+                onPressed: sendDatatoAPIWithFakeLocation,
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(16),
+                  backgroundColor: Colors.deepPurple,
                 ),
                 child: const Icon(
                   Icons.warning,
