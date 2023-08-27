@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:g/services/dummy_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../services/api_service.dart';
+
 class GoogleMapWidget extends StatefulWidget {
   final double initialLat;
   final double initialLong;
@@ -41,9 +43,9 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
     final BitmapDescriptor customIcon =
         BitmapDescriptor.fromBytes(markerIconBytes);
 
-    // List<dynamic> data = await ApiService.getHighLocations();
+    List<dynamic> data = await ApiService.getHighLocations();
 
-    List<dynamic> data = await DummyService.getDummyLocations();
+    // List<dynamic> data = await DummyService.getDummyLocations();
 
     Set<Marker> markers = data.map((item) {
       final location = item['location'].toString().split('_');

@@ -20,20 +20,14 @@ import 'dart:io';
 
 import 'api/firebase_api.dart';
 
-const AndroidNotificationChannel channel = AndroidNotificationChannel(
-  'high_importance_channel', // id
-  'High Importance Notifications', // title
-  // 'This channel is used for important notifications.', // description
-  importance: Importance.high,
-);
-
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await FirebaseApi().initNotifications();
+
+  final RemoteMessage? remoteMessage =
+      await FirebaseMessaging.instance.getInitialMessage();
+
   runApp(const MyApp());
 }
 
@@ -61,6 +55,9 @@ class _MyAppState extends State<MyApp> {
     setState(() => _iosInfo = iosInfo);
   }
 
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
   AndroidCarrierData? _androidInfo;
   AndroidCarrierData? get androidInfo => _androidInfo;
   set androidInfo(AndroidCarrierData? carrierInfo) {
@@ -76,12 +73,12 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
 
     dataUpdateTimer = Timer.periodic(
-      const Duration(seconds: 20),
+      const Duration(seconds: 10),
       (Timer t) => updateData(),
     );
 
     firebaseUpdateTimer = Timer.periodic(
-      const Duration(minutes: 15),
+      const Duration(seconds: 15),
       (Timer t) => updateFirebaseData(),
     );
   }
@@ -89,7 +86,10 @@ class _MyAppState extends State<MyApp> {
   void updateData() async {
     await getLocation();
     await getSignalStrength();
-    // await ApiService.sendDatatoAPI(lat, long, signalLevel);
+
+    if (lat != 0 && long != 0 && signalLevel != 0) {
+      await ApiService.sendDatatoAPI(lat, long, signalLevel);
+    }
   }
 
   void updateFirebaseData() async {
@@ -222,6 +222,24 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
           ])),
+    );
+  }
+
+  Future<void> showNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'high_importance_channel', // id
+      'High Importance Notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Test Notification',
+      'This is a test notification.',
+      platformChannelSpecifics,
     );
   }
 }

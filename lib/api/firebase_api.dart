@@ -1,5 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+import '../services/local_notifications.dart';
+
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
   print('\x1B[31mTitle: ${message.notification!.title}');
   print('Body: ${message.notification!.body}');
@@ -22,13 +24,18 @@ class FirebaseApi {
     await _firebaseMessaging.requestPermission();
     _firebaseMessaging.subscribeToTopic('all');
 
+    LocalNotificationService.initialize();
+
     print('\x1B[31m Token: ${await getToken()}\x1B[0m');
 
     FirebaseMessaging.onMessage.listen((message) {
       print('\x1B[31mTitle: ${message.notification!.title}');
       print('Body: ${message.notification!.body}');
       print('Payload: ${message.data} \x1B[0m');
+
+      LocalNotificationService.displayNotificationOnForeground(message);
     });
+
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
   }
 
