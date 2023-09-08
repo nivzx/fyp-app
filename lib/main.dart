@@ -213,40 +213,40 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
             ),
-            Positioned(
-              bottom: 60, // Adjust the value for vertical positioning
-              left: 16, // Adjust the value for horizontal positioning
-              child: ElevatedButton(
-                onPressed: sendDatatoAPIWithFixedValue,
-                style: ElevatedButton.styleFrom(
-                  shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(16),
-                  backgroundColor: Colors.red,
-                ),
-                child: const Icon(
-                  Icons.warning,
-                  size: 24,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 60, // Adjust the value for vertical positioning
-              left: 80, // Adjust the value for horizontal positioning
-              child: ElevatedButton(
-                onPressed: sendDatatoAPIWithFakeLocation,
-                style: ElevatedButton.styleFrom(
-                  shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(16),
-                  backgroundColor: Colors.deepPurple,
-                ),
-                child: const Icon(
-                  Icons.warning,
-                  size: 24,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+            // Positioned(
+            //   bottom: 60, // Adjust the value for vertical positioning
+            //   left: 16, // Adjust the value for horizontal positioning
+            //   child: ElevatedButton(
+            //     onPressed: sendDatatoAPIWithFixedValue,
+            //     style: ElevatedButton.styleFrom(
+            //       shape: const CircleBorder(),
+            //       padding: const EdgeInsets.all(16),
+            //       backgroundColor: Colors.red,
+            //     ),
+            //     child: const Icon(
+            //       Icons.warning,
+            //       size: 24,
+            //       color: Colors.white,
+            //     ),
+            //   ),
+            // ),
+            // Positioned(
+            //   bottom: 60, // Adjust the value for vertical positioning
+            //   left: 80, // Adjust the value for horizontal positioning
+            //   child: ElevatedButton(
+            //     onPressed: sendDatatoAPIWithFakeLocation,
+            //     style: ElevatedButton.styleFrom(
+            //       shape: const CircleBorder(),
+            //       padding: const EdgeInsets.all(16),
+            //       backgroundColor: Colors.deepPurple,
+            //     ),
+            //     child: const Icon(
+            //       Icons.warning,
+            //       size: 24,
+            //       color: Colors.white,
+            //     ),
+            //   ),
+            // ),
           ])),
     );
   }
