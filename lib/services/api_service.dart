@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'aes.dart';
+
 class ApiService {
   static Future<void> sendDatatoAPI(
       double lat, double long, int signalLevel) async {
@@ -11,10 +13,13 @@ class ApiService {
       "level": signalLevel,
     };
 
+    final plainText = json.encode(dataTel);
+    final encryptedText = AESEncryptor.encryptData(plainText);
+
     final response = await http.post(
       Uri.parse('${dotenv.env['API_BASE_URL']}:33000/incoming-data'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode(dataTel),
+      body: json.encode({"data": encryptedText}),
     );
 
     if (response.statusCode == 200) {
