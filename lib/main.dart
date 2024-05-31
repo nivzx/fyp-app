@@ -45,6 +45,9 @@ class _MyAppState extends State<MyApp> {
   double? latitude;
   double? longitude;
   double? signalStrength;
+  bool usePredefinedLocation = false;
+  bool usePredefinedSignalStrength = false;
+
   late Timer dataUpdateTimer;
   late Timer firebaseUpdateTimer;
   int signalLevel = 0;
@@ -76,7 +79,7 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
 
     dataUpdateTimer = Timer.periodic(
-      const Duration(seconds: 10),
+      const Duration(seconds: 5),
       (Timer t) => updateData(),
     );
 
@@ -103,7 +106,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   getLocation() async {
-    Position currentPosition = await LocationService.getCurrentPosition();
+    Position currentPosition =
+        await LocationService.getCurrentPosition(usePredefinedLocation);
 
     setState(() {
       lat = currentPosition.latitude;
@@ -112,7 +116,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   getSignalStrength() async {
-    int signalStrength = await SignalService.getSignalStrength();
+    int signalStrength =
+        await SignalService.getSignalStrength(usePredefinedSignalStrength);
 
     setState(() {
       signalLevel = signalStrength;
@@ -230,23 +235,34 @@ class _MyAppState extends State<MyApp> {
                 ),
               ),
             ),
-            // Positioned(
-            //   bottom: 60, // Adjust the value for vertical positioning
-            //   left: 80, // Adjust the value for horizontal positioning
-            //   child: ElevatedButton(
-            //     onPressed: sendDatatoAPIWithFakeLocation,
-            //     style: ElevatedButton.styleFrom(
-            //       shape: const CircleBorder()
-            //       padding: const EdgeInsets.all(16),
-            //       backgroundColor: Colors.deepPurple,
-            //     ),
-            //     child: const Icon(
-            //       Icons.warning,
-            //       size: 24,
-            //       color: Colors.white,
-            //     ),
-            //   ),
-            // ),
+            Positioned(
+              top: 0, // Adjust the value for vertical positioning
+              left: 20, // Adjust the value for horizontal positioning
+              child: Switch(
+                value: usePredefinedSignalStrength,
+                onChanged: (value) {
+                  setState(() {
+                    usePredefinedSignalStrength = value;
+                  });
+                },
+                activeColor: Colors.red, // Color when turned on
+                inactiveTrackColor: Colors.green, // Color when turned off
+              ),
+            ),
+            Positioned(
+              top: 0, // Adjust the value for vertical positioning
+              right: 20, // Adjust the value for horizontal positioning
+              child: Switch(
+                value: usePredefinedLocation,
+                onChanged: (value) {
+                  setState(() {
+                    usePredefinedLocation = value;
+                  });
+                },
+                activeColor: Colors.red, // Color when turned on
+                inactiveTrackColor: Colors.green, // Color when turned off
+              ),
+            ),
           ])),
     );
   }

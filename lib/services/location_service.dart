@@ -2,8 +2,20 @@ import 'package:geolocator/geolocator.dart';
 import 'dart:math';
 
 class LocationService {
-  static Future<Position> getCurrentPosition() async {
-    return Geolocator.getCurrentPosition();
+  static Future<Position> getCurrentPosition(bool usePredefinedLocation) async {
+    if (usePredefinedLocation) {
+      return Position(
+          latitude: 6.081,
+          longitude: 80.121,
+          accuracy: 0.0, // Placeholder value for accuracy
+          altitude: 0.0, // Placeholder value for altitude
+          heading: 0.0, // Placeholder value for heading
+          speed: 0.0, // Placeholder value for speed
+          speedAccuracy: 0.0, // Placeholder value for speed accuracy
+          timestamp: DateTime.now());
+    } else {
+      return Geolocator.getCurrentPosition();
+    }
   }
 
   //Get random location for testing
